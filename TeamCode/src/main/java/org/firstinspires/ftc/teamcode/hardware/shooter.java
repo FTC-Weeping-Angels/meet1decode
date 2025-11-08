@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 public class shooter {
@@ -12,6 +13,8 @@ public class shooter {
     private ServoImplEx pitch;
     private DcMotorEx rrhino;
     private DcMotorEx lrhino;
+    private Servo kicker;
+
 
     // ---- Sensors ---- //
 
@@ -20,6 +23,7 @@ public class shooter {
         this.lrhino = hwMap.get(DcMotorEx.class, "lrhino");
         this.rrhino = hwMap.get(DcMotorEx.class, "rrhino");
         this.pitch = hwMap.get(ServoImplEx.class, "pitch");
+        this.kicker = hwMap.get(ServoImplEx.class, "kicker");
 
         this.lrhino.setDirection(DcMotorEx.Direction.FORWARD);
         this.rrhino.setDirection(DcMotorEx.Direction.REVERSE);
@@ -29,7 +33,9 @@ public class shooter {
 
 
     public void setshooter(double power) {rrhino.setPower(power); lrhino.setPower(power);}
-
+    public void setKickerspeed(double position) {
+        kicker.setPosition(position);
+    }
     public void setPitchPosition(double position) {
         pitch.setPosition(position);
     }
@@ -37,9 +43,14 @@ public class shooter {
     public double getPitchPosition() {
         return pitch.getPosition();
     }
+    public double getKickerPosition() {
+        return kicker.getPosition();
+    }
     public DcMotorEx getRrhino() {return rrhino;}
     public DcMotorEx getLrhino() {return lrhino;}
-
+    public Servo getKicker() {
+        return kicker;
+    }
 
     public String getData() {
 

@@ -10,25 +10,27 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.ServoImplEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
+import org.firstinspires.ftc.teamcode.hardware.intake.IntakeState;
+import org.firstinspires.ftc.teamcode.hardware.intake.TransferState;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 import org.firstinspires.ftc.teamcode.hardware.drive;
 
-
+import org.firstinspires.ftc.teamcode.hardware.turret;
 import org.firstinspires.ftc.teamcode.hardware.intake;
 import org.firstinspires.ftc.teamcode.hardware.shooter;
 
 
 
-@TeleOp(name="tele", group="Linear OpMode")
-public class tele extends LinearOpMode {
+@TeleOp(name="smtele", group="Linear OpMode")
+public class cleantele extends LinearOpMode {
 
 
     // -- Hardware -- //
     private intake intake;
     private drive drivetrain;
     private shooter shooter;
+    private turret turret;
 
     private final double speed = 1.0;
     ElapsedTime transferTime2 = new ElapsedTime();
@@ -80,24 +82,22 @@ public class tele extends LinearOpMode {
             drivetrain.updateMotorPowers();
             //    ------------- GAMEPAD 2 CONTROLS ----------- //
             if (currentGamepad1.right_trigger > 0.5 && previousGamepad1.right_trigger > 0.5) {
-                intake.setTransferspeed(1);// Change to gamepad2 if that's what you need.
-                intake.setSpinner(-1);
+                intake.setIntakeState(IntakeState.INTAKING);
+                intake.setTransferState(TransferState.SCANNING);
+
 
             } else if (currentGamepad1.left_trigger > 0.5 && previousGamepad1.left_trigger > 0.5) {  // Change to gamepad2 if that's what you need.
                 intake.setSpinner(1);
                 intake.setTransferspeed(1);
             }  else {
-                intake.setSpinner(0);
-               // intake.setTransferspeed(0.5);
+                intake.setIntakeState(IntakeState.STOP_SPINNER);
+                // intake.setTransferspeed(0.5);
             }
             if(intake.ballthreeinrobot()){
                 intake.led3ballsdetected();
             } else if(!intake.ballthreeinrobot()){ intake.noballsdetected();}
-//            if(!intake.ballthreeinrobot()){
-//                intake.noballsdetected();
-//            }
 
-             if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
                 // Change to gamepad2 if that's what you need.
                 shooter.setshooter(0.92);
                 //transferTime2.reset();
@@ -121,9 +121,9 @@ public class tele extends LinearOpMode {
                 // Change to gamepad2 if that's what you need.
                 shooter.setshooter(-1);
                 transferTime2.reset();
-               // if(transferTime2.milliseconds() >= 1500){
-                    intake.setTransferspeed(0);
-               // }
+                // if(transferTime2.milliseconds() >= 1500){
+                intake.setTransferspeed(0);
+                // }
 
 
 
@@ -146,6 +146,17 @@ public class tele extends LinearOpMode {
                 shooter.setKickerspeed(0.5);
             }
 
+           /// ???????
+            if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {  // Change to gamepad2 if that's what you need.
+               turret.setturretspeed(1);
+
+            } else if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {  // Change to gamepad2 if that's what you need.
+                turret.setturretspeed(-1);
+            } else if(currentGamepad1.leftBumperWasReleased() || currentGamepad1.rightBumperWasReleased()) {
+                turret.setturretspeed(0.5);
+            }
+            ////?????
+
 
             if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up) {  // Change to gamepad2 if that's what you need.
                 shooter.setPitchPosition(shooter.getPitchPosition()+0.05);
@@ -161,30 +172,59 @@ public class tele extends LinearOpMode {
                 intake.setblockposition(intake.gatedown);
             }
 
-//            switch (intake.getIntakeState()) {
-//
-//
-//            }
+            switch (intake.getIntakeState()) {
+                case IDLE:
+                    break;
+                case INTAKING:
+                    intake.setTransferspeed(1);// Change to gamepad2 if that's what you need.
+                    intake.setSpinner(-1);
+                    //intake.setIntakeState(IntakeState.SCANNING);
+                    break;
+                case STOP_SPINNER:
+                    intake.setSpinner(0);
+                    //intake.setIntakeState(IntakeState.SCANNING);
+                    break;
 
+            }
+
+            switch (intake.getTransferState()) {
+                case IDLE:
+                    break;
+                case SCANNING:
+                    if(!intake.breakBeamBoolean()){
+                        intake.setTransferspeed(0.5);
+                        intake.setTransferState(TransferState.TRANSFEROFF);
+                    }
+                    //intake.setIntakeState(IntakeState.SCANNING);
+                    break;
+                case TRANSFEROFF:
+                    intake.setTransferspeed(0.5);
+                    //intake.setIntakeState(IntakeState.SCANNING);
+                    break;
+
+            }
 
             updateTelemetry();
         }
 
     }
 
+
+
+
     /**
      * Sends debug data to control hub
      */
     private void updateTelemetry () {
-        telemetry.addData("Intake Data", 1);
+       // telemetry.addData("Intake Data", 1);
         telemetry.addData("pitch_pos:", shooter.getPitchPosition());
         telemetry.addData("kickerspeed:", shooter.getKickerPosition());
-        telemetry.addData("transferclock:", transferTime2.seconds());
+        //telemetry.addData("transferclock:", transferTime2.seconds());
         telemetry.addData("shooter:", shooter.getLrhino().getPower());
         telemetry.addData("DISTANCESENSOR", intake.ballthreeinrobot());
         telemetry.addData("breakbeam detected:", intake.breakBeamBoolean());
-
-
+        telemetry.addData("intakestate:", intake.getIntakeState());
+        telemetry.addData("transferstate:", intake.getTransferState());
         // telemetry.addData("Spinner AMPS: ", intake.getSpinner().getCurrent(CurrentUnit.AMPS));
 
         telemetry.update();
