@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,6 +19,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.hardware.shooter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,16 +35,22 @@ public class intake {
         BACKSPIN,
         STOP_SPINNER,
 
+
     }
 
     public enum TransferState {
         IDLE, // Idle
         SCANNING,
-        TRANSFEROFF,// just starts the spinner, then moves on
+        TRANSFEROFF,
+        FIRE,
+        REVERSE,
+        INTAKING// just starts the spinner, then moves on
 
     }
 
+    private shooter shooter;
     // ---- Mechanisms ---- //
+    private ElapsedTime waitTimer2 = new ElapsedTime();
     private Servo transfer;
 
     private Servo blocker;
@@ -81,6 +90,8 @@ public class intake {
 
         this.intakeState = IntakeState.IDLE;
         this.transferState = TransferState.IDLE;
+        this.shooter = new shooter();
+        shooter.init(hwMap);////
 
     }
 
@@ -101,6 +112,17 @@ public class intake {
     }
     public void setblockposition(double position) {
         blocker.setPosition(position);
+    }
+
+
+    public void firefortime( double time) {
+        waitTimer2.reset();
+        shooter.setKickerspeed(0);
+        transfer.setPosition(1);
+        if(waitTimer2.milliseconds() >= time){
+            shooter.setKickerspeed(0.5);
+            transfer.setPosition(0.5);
+        }
     }
 
     public void settransferledposition(double position) {
@@ -208,6 +230,9 @@ public class intake {
 
     public double getSpinnerVoltage() {
         return spinner.getCurrent(CurrentUnit.AMPS);
+    }
+    public shooter getShooter () {
+        return shooter;
     }
 
     //    public Limelight getLimelight() {
