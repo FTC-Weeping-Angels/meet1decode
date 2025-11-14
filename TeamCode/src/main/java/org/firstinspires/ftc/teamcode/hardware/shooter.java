@@ -15,7 +15,9 @@ public class shooter {
         BACKSPIN,
         STOP_SHOOTER,
         FIREFULLPOWER,
+        FIREFAR,
         FIREREDUCED,
+
 
     }
     // ---- Mechanisms ---- //
@@ -28,12 +30,12 @@ public class shooter {
     private ShooterState shooterState;
     // ---- Sensors ---- //
 
-    public void init(HardwareMap hwMap) {
+    public shooter(HardwareMap hardwareMap) {
 
-        this.lrhino = hwMap.get(DcMotorEx.class, "lrhino");
-        this.rrhino = hwMap.get(DcMotorEx.class, "rrhino");
-        this.pitch = hwMap.get(ServoImplEx.class, "pitch");
-        this.kicker = hwMap.get(ServoImplEx.class, "kicker");
+        this.lrhino = hardwareMap.get(DcMotorEx.class, "lrhino");
+        this.rrhino = hardwareMap.get(DcMotorEx.class, "rrhino");
+        this.pitch = hardwareMap.get(ServoImplEx.class, "pitch");
+        this.kicker = hardwareMap.get(ServoImplEx.class, "kicker");
 
         this.lrhino.setDirection(DcMotorEx.Direction.FORWARD);
         this.rrhino.setDirection(DcMotorEx.Direction.REVERSE);

@@ -1,6 +1,8 @@
+
 package org.firstinspires.ftc.teamcode.opmodes;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,7 +21,7 @@ import org.firstinspires.ftc.teamcode.hardware.drive;
 import org.firstinspires.ftc.teamcode.hardware.intake;
 import org.firstinspires.ftc.teamcode.hardware.shooter;
 
-
+@Disabled
 
 @TeleOp(name="tele", group="Linear OpMode")
 public class tele extends LinearOpMode {
@@ -88,7 +90,7 @@ public class tele extends LinearOpMode {
                 intake.setTransferspeed(1);
             }  else {
                 intake.setSpinner(0);
-               // intake.setTransferspeed(0.5);
+                // intake.setTransferspeed(0.5);
             }
             if(intake.ballthreeinrobot()){
                 intake.led3ballsdetected();
@@ -97,7 +99,7 @@ public class tele extends LinearOpMode {
 //                intake.noballsdetected();
 //            }
 
-             if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
                 // Change to gamepad2 if that's what you need.
                 shooter.setshooter(0.92);
                 //transferTime2.reset();
@@ -121,9 +123,9 @@ public class tele extends LinearOpMode {
                 // Change to gamepad2 if that's what you need.
                 shooter.setshooter(-1);
                 transferTime2.reset();
-               // if(transferTime2.milliseconds() >= 1500){
-                    intake.setTransferspeed(0);
-               // }
+                // if(transferTime2.milliseconds() >= 1500){
+                intake.setTransferspeed(0);
+                // }
 
 
 

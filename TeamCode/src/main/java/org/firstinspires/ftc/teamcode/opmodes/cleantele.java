@@ -32,6 +32,14 @@ public class cleantele extends LinearOpMode {
     private drive drivetrain;
     private shooter shooter;
     private turret turret;
+    private final double MAX_POWER = 1; // Maximum speed (0.0 to 1.0)
+    private final double STOP_THRESHOLD = 100; // Stop movement if within this many ticks of the target
+
+//    // Define Target Ticks (Assuming 360 degree rotation takes 1000 ticks for example)
+//    private final int FORWARD_TICKS = 0;
+//    private final int LEFT_TICKS = 250;
+//    private final int RIGHT_TICKS = -250;
+    private final double P_GAIN = 0.00025;
 
     private final double speed = 1.0;
     ElapsedTime transferTime2 = new ElapsedTime();
@@ -50,12 +58,12 @@ public class cleantele extends LinearOpMode {
         Gamepad previousGamepad1 = new Gamepad();
 
         Gamepad previousGamepad2 = new Gamepad();
-        shooter.setPitchPosition(0.6294);
+
         turret.resetencoder();
 
 
         waitForStart();
-
+        shooter.setPitchPosition(0.6294);
 
         while (opModeIsActive() && !isStopRequested()) {
 
@@ -94,10 +102,13 @@ public class cleantele extends LinearOpMode {
             }
 
             if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                 shooter.setShooterState(ShooterState.FIREFULLPOWER);
+                 shooter.setShooterState(ShooterState.FIREFAR);
             }
 
             if (currentGamepad1.circle && !previousGamepad1.circle) {
+                shooter.setShooterState(ShooterState.FIREREDUCED);
+            }
+            if (currentGamepad2.circle && !previousGamepad2.circle) {
                 shooter.setShooterState(ShooterState.FIREREDUCED);
             }
 
@@ -131,14 +142,24 @@ public class cleantele extends LinearOpMode {
             } else if(currentGamepad2.leftBumperWasReleased() || currentGamepad2.rightBumperWasReleased()) {
                 turret.setturretspeed(0.5);
             }
+
+
+            if (currentGamepad1.dpad_right && !previousGamepad1.dpad_right) {  // Change to gamepad2 if that's what you need.
+                turret.setturretspeed(0.2);
+
+            } else if (currentGamepad1.dpad_left && !previousGamepad1.dpad_left) {  // Change to gamepad2 if that's what you need.
+                turret.setturretspeed(0.8);
+            } else if(currentGamepad1.dpadLeftWasReleased() || currentGamepad1.dpadRightWasReleased()) {
+                turret.setturretspeed(0.5);
+            }
             ////?????
             if (currentGamepad2.a && !previousGamepad2.a) {  // Change to gamepad2 if that's what you need.
-                turret.setturretposition(30);
+                moveTurretToPosition(3000);
 
             }
 
             if (currentGamepad2.y && !previousGamepad2.y) {  // Change to gamepad2 if that's what you need.
-                turret.setturretposition(-30);
+                moveTurretToPosition(-2500);
 
             }
 
@@ -209,6 +230,10 @@ public class cleantele extends LinearOpMode {
                     shooter.setShooterState(ShooterState.IDLE);
                     break;
                 case FIREREDUCED:
+                    shooter.setshooter(0.8);
+                    shooter.setShooterState(ShooterState.IDLE);
+                    break;
+                case FIREFAR:
                     shooter.setshooter(0.87);
                     shooter.setShooterState(ShooterState.IDLE);
                     break;
@@ -220,14 +245,57 @@ public class cleantele extends LinearOpMode {
                     shooter.setshooter(0);
                     shooter.setShooterState(ShooterState.IDLE);
                     break;
+
             }
+
+
+
 
             updateTelemetry();
         }
 
     }
 
+    public void moveTurretToPosition(int targetTicks) {
 
+        double currentPosition;
+        double error;
+        double calculatedPower;
+        double servoCommand;
+
+        while ( Math.abs(targetTicks - turret.getturretposticks()) > STOP_THRESHOLD) {
+
+            currentPosition = turret.getturretposticks();
+
+            // 1. Calculate Error (in Ticks)
+            error = targetTicks - currentPosition;
+
+            // 2. Calculate Power (P Control)
+            calculatedPower = error * P_GAIN;
+
+            // 3. Limit and Clip Power
+            calculatedPower = Range.clip(calculatedPower, -MAX_POWER, MAX_POWER);
+
+            // 4. Convert Power (-1.0 to 1.0) to Servo Command (0.0 to 1.0)
+            servoCommand = 0.5 + (calculatedPower / 2.0);
+
+            // 5. Command the Servo
+           turret.setturretspeed(servoCommand);
+
+            // --- Telemetry for Debugging ---
+//        telemetry.addData("Target", "%.1f°", targetAngleDegrees);
+//        telemetry.addData("Current", "%.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
+//        telemetry.addData("Error Ticks", (int) error);
+//        telemetry.addData("Power", String.format("%.3f", calculatedPower));
+//        telemetry.update();
+        }
+
+        // Stop the Servo
+        turret.setturretspeed(0.5);
+//        telemetry.addData("Movement Complete", "Stopped at %.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
+//        telemetry.update();
+      //  return;
+    }
 
 
     /**
@@ -238,12 +306,14 @@ public class cleantele extends LinearOpMode {
         telemetry.addData("pitch_pos:", shooter.getPitchPosition());
         telemetry.addData("kickerspeed:", shooter.getKickerPosition());
         telemetry.addData("shooter:", shooter.getLrhino().getPower());
-        telemetry.addData("DISTANCESENSOR", intake.ballthreeinrobot());
+        telemetry.addData("DISTANCESENSOR", intake.laserdistance());
         telemetry.addData("breakbeam detected:", intake.breakBeamBoolean());
         telemetry.addData("intakestate:", intake.getIntakeState());
         telemetry.addData("shooterstate:", shooter.getshooterState());
         telemetry.addData("transferstate:", intake.getTransferState());
-        telemetry.addData("turretpos:", turret.getturretpos());
+
+        telemetry.addData("turretposticks:", turret.getturretposticks());
+        telemetry.addData("turretposdeg:", turret.getturretpos());
       //  telemetry.addData("axonpos:", turret.axonencoderpos());
         // telemetry.addData("Spinner AMPS: ", intake.getSpinner().getCurrent(CurrentUnit.AMPS));
 
@@ -257,15 +327,15 @@ public class cleantele extends LinearOpMode {
     private void initDrive () {
 //        this.controllers = new Controllers(this);
 
-        this.intake = new intake();
-        intake.init(hardwareMap);
+//        this.intake = new intake();
+//        intake.init(hardwareMap);
 
 
         this.drivetrain = new drive();
         drivetrain.init(hardwareMap);
 
-        this.shooter = new shooter();
-        shooter.init(hardwareMap);////
+//        this.shooter = new shooter();
+//        shooter.init(hardwareMap);////
 
         this.turret = new turret();
         turret.init(hardwareMap);

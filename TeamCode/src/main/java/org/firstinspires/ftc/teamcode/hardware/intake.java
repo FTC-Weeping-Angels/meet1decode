@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.har
 
 import android.graphics.Color;
 
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -48,6 +49,9 @@ public class intake {
 
     }
 
+    private static final double MAX_VOLTS = 3.3;
+    private static final double MAX_DISTANCE_MM = 1000.0;
+
     private shooter shooter;
     // ---- Mechanisms ---- //
     private ElapsedTime waitTimer2 = new ElapsedTime();
@@ -57,7 +61,7 @@ public class intake {
     private Servo transferled;
     private DcMotorEx spinner;
     private DigitalChannel breakbeam;
-    DistanceSensor thirdball;
+    AnalogInput thirdball;
     ElapsedTime transferTime = new ElapsedTime();
     // ---- Sensors ---- //
     public double gatedown = 0.62;
@@ -71,18 +75,18 @@ public class intake {
     private IntakeState intakeState;
     private TransferState transferState;
 
-    public void init(HardwareMap hwMap) {
+    public intake(HardwareMap hardwareMap) {
 
 
         // this.wrist = hwMap.get(ServoImplEx.class, "intake_wrist");
 
-        this.spinner = hwMap.get(DcMotorEx.class, "intake");
-        this.transfer = hwMap.get(ServoImplEx.class, "transfer");
-        this.blocker = hwMap.get(ServoImplEx.class, "blocker");
-        this.transferled = hwMap.get(ServoImplEx.class, "ledtransfer");
+        this.spinner = hardwareMap.get(DcMotorEx.class, "intake");
+        this.transfer = hardwareMap.get(ServoImplEx.class, "transfer");
+        this.blocker = hardwareMap.get(ServoImplEx.class, "blocker");
+        this.transferled = hardwareMap.get(ServoImplEx.class, "ledtransfer");
 
-        this.thirdball = hwMap.get(DistanceSensor.class, "thirdball");
-        this.breakbeam = hwMap.get(DigitalChannel.class, "breakbeam");
+        this.thirdball = hardwareMap.get(AnalogInput.class, "thirdball");
+        this.breakbeam = hardwareMap.get(DigitalChannel.class, "breakbeam");
 
         this.spinner.setDirection(DcMotorEx.Direction.REVERSE);
 
@@ -90,8 +94,8 @@ public class intake {
 
         this.intakeState = IntakeState.IDLE;
         this.transferState = TransferState.IDLE;
-        this.shooter = new shooter();
-        shooter.init(hwMap);////
+        //this.shooter = new shooter();
+      //  shooter;
 
     }
 
@@ -115,24 +119,24 @@ public class intake {
     }
 
 
-    public void firefortime( double time) {
-        waitTimer2.reset();
-        shooter.setKickerspeed(0);
-        transfer.setPosition(1);
-        if(waitTimer2.milliseconds() >= time){
-            shooter.setKickerspeed(0.5);
-            transfer.setPosition(0.5);
-        }
-    }
+//    public void firefortime( double time) {
+//        waitTimer2.reset();
+//        shooter.setKickerspeed(0);
+//        transfer.setPosition(1);
+//        if(waitTimer2.milliseconds() >= time){
+//            shooter.setKickerspeed(0.5);
+//            transfer.setPosition(0.5);
+//        }
+//    }
 
     public void settransferledposition(double position) {
         transferled.setPosition(position);
     }
     public void led3ballsdetected() {
-        transferled.setPosition(0.5);
+        transferled.setPosition(0.29);
     }
     public void noballsdetected() {
-        transferled.setPosition(0.29);
+        transferled.setPosition(0.5);
     }
 
 
@@ -152,6 +156,14 @@ public class intake {
             transfer.setPosition(0.5);
         }
     }
+
+    public void setintakefortime(double seconds) {
+        transferTime.reset();
+        spinner.setPower(1);
+        if(transferTime.seconds() >= seconds) {
+            spinner.setPower(0);
+        }
+    }
     public void setIntakeState(IntakeState intakeState) {
         this.intakeState = intakeState;
     }
@@ -163,15 +175,24 @@ public class intake {
 
     }
 
+public double laserdistance(){
+    // Read sensor voltage (0.0–3.3V)
+    double volts = thirdball.getVoltage();
+
+    // Convert voltage to distance in millimeters (linear mapping)
+    double distanceMM = (volts / MAX_VOLTS) * MAX_DISTANCE_MM;
+return distanceMM;
+}
+
     public boolean ballthreeinrobot(){
-       if (thirdball.getDistance(DistanceUnit.CM)<=6){
+       if (laserdistance()<=60){
         return true;
 
        }
        return false;
     }
     public boolean emptyrobot(){
-        if (thirdball.getDistance(DistanceUnit.CM)<=8){
+        if (laserdistance() >=70){
             return true;
 
         }
@@ -231,9 +252,9 @@ public class intake {
     public double getSpinnerVoltage() {
         return spinner.getCurrent(CurrentUnit.AMPS);
     }
-    public shooter getShooter () {
-        return shooter;
-    }
+//    public shooter getShooter () {
+//        return shooter;
+//    }
 
     //    public Limelight getLimelight() {
 //        return limelight;
