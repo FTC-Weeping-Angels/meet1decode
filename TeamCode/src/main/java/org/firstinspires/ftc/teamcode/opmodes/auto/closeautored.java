@@ -173,11 +173,11 @@ public class closeautored extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
-        this.intake = new intake();
-        intake.init(hardwareMap);
+//        this.intake = new intake();
+//        intake.init(hardwareMap);
 
-        this.shooter = new shooter();
-        shooter.init(hardwareMap);////
+//        this.shooter = new shooter();
+//        shooter.init(hardwareMap);////
 
         this.turret = new turret() ;
 
