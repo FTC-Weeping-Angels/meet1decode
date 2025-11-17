@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.hardware.shooter;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "closered", group = "auto")
-public class closeautored extends OpMode {
+@Autonomous(name = "farred", group = "auto")
+public class farautored extends OpMode {
     private Follower follower;
     private intake intake;
     private shooter shooter;
@@ -31,20 +31,18 @@ public class closeautored extends OpMode {
     private int pathState;
     //private Path scorePreload;
     private PathChain scorePreload, intakeset1, scoreset1, intakeset2,scoreset2, parkpath ;
-    private final Pose startPose = new Pose(120, 124, Math.toRadians(35));
-    private final Pose preloadshootpose = new Pose(83, 88, Math.toRadians(0));
-    private final Pose score1shootpose = new Pose(87, 90, Math.toRadians(0));
-   // private final Pose preloadshootpose = new Pose(83, 90, Math.toRadians(0));
-    private final Pose endintake = new Pose(118.5, 85, Math.toRadians(-5));
-    public Pose intake2mid = new Pose(75, 50, Math.toRadians(0));
-    public Pose endintake2 = new Pose(130, 66, Math.toRadians(-15));
-    public Pose score2mid = new Pose(75, 58, Math.toRadians(0));
-    public Pose parkpose = new Pose(106, 90, Math.toRadians(0));
+    private final Pose startPose = new Pose(80, 10, Math.toRadians(90));
+    public Pose intake1mid = new Pose(80, 42, Math.toRadians(0));
+    private final Pose endintake = new Pose(130, 36, Math.toRadians(0));
+    private final Pose score1shootpose = new Pose(88, 19, Math.toRadians(90));
+    // private final Pose preloadshootpose = new Pose(83, 90, Math.toRadians(0));
+
+
+    public Pose parkpose = new Pose(87, 35, Math.toRadians(90));
 
     private final double MAX_POWER = 1; // Maximum speed (0.0 to 1.0)
     private final double STOP_THRESHOLD = 100;
-    private final double shooterspeed =0.72
-            ;// Stop movement if within this many ticks of the target
+    private final double shooterspeed =.86;// Stop movement if within this many ticks of the target
 
     //    // Define Target Ticks (Assuming 360 degree rotation takes 1000 ticks for example)
 //    private final int FORWARD_TICKS = 0;
@@ -54,42 +52,25 @@ public class closeautored extends OpMode {
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-       // scorePreload = new Path(new BezierLine(startPose, preloadshootpose));
-      //  scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), preloadshootpose.getHeading());
+        // scorePreload = new Path(new BezierLine(startPose, preloadshootpose));
+        //  scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), preloadshootpose.getHeading());
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        scorePreload = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, preloadshootpose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), preloadshootpose.getHeading())
-                .build();
+
         intakeset1 = follower.pathBuilder()
-                .addPath(new BezierLine(preloadshootpose, endintake))
-                .setLinearHeadingInterpolation(preloadshootpose.getHeading(), endintake.getHeading())
+                .addPath(new BezierCurve(startPose, intake1mid, endintake))
+                .setTangentHeadingInterpolation()
                 .build();
         scoreset1 = follower.pathBuilder()
                 .addPath(new BezierLine(endintake, score1shootpose))
-                .setConstantHeadingInterpolation(0)
-                .setTimeoutConstraint(500)
-                .setBrakingStrength(1)
-                .build();
-
-        intakeset2 = follower.pathBuilder()
-                   // follower.setMaxPower(.25);
-                .addPath(new BezierCurve(score1shootpose, intake2mid, endintake2))
-                .setLinearHeadingInterpolation(score1shootpose.getHeading(), endintake2.getHeading())
-                .setBrakingStrength(5)
-                .build();
-        scoreset2 = follower.pathBuilder()
-                // follower.setMaxPower(.25);
-                .addPath(new BezierCurve(endintake2, score2mid, preloadshootpose))
-                .setConstantHeadingInterpolation(0)
+                .setLinearHeadingInterpolation(endintake.getHeading(), score1shootpose.getHeading())
                 .setTimeoutConstraint(300)
                 .setBrakingStrength(2)
                 .build();
         parkpath = follower.pathBuilder()
                 // follower.setMaxPower(.25);
-                .addPath(new BezierLine(preloadshootpose, parkpose))
+                .addPath(new BezierLine(score1shootpose, parkpose))
                 .setConstantHeadingInterpolation(0)
                 .setBrakingStrength(5)
                 .build();
@@ -101,55 +82,41 @@ public class closeautored extends OpMode {
         switch (pathState) {
             case 10: // First path to depo preload
 
-                follower.setMaxPower(.95);
-
-                follower.followPath(scorePreload, false);
                 shooter.setshooter(shooterspeed);
+                turret.moveTurretToPosition(-1650);
 
-                waitTimer1.reset();
-                setPathState(11);
+                waitTimer2.reset();
+                setPathState(12);
                 break;
 
-            case 11: // First path to depo preload
-                if(follower.getCurrentTValue() >= 0.6){
-                    turret.moveTurretToPosition(4100);
-
-                    waitTimer2.reset();
-                    setPathState(12);
-                }
-
-
-                break;
             case 12: // First path to depo preload
-               if(!follower.isBusy() && waitTimer2.seconds() >= 3){
-                   intake.setSpinner(-1);
-                   shooter.setKickerspeed(0);
-                   intake.setTransferspeed(1);
-                   waitTimer1.reset();
-                   setPathState(100);
-               }
-
-
+                if(waitTimer2.seconds() >= 3){
+                    intake.setSpinner(-1);
+                    shooter.setKickerspeed(0);
+                    intake.setTransferspeed(1);
+                    waitTimer1.reset();
+                    setPathState(100);
+                }
                 break;
 
             //case 11:
             case 100:
-                if (!follower.isBusy() && waitTimer1.seconds() >= 5) {
+                if (waitTimer1.seconds() >= 4.5) {
                     shooter.setshooter(0);
                     shooter.setKickerspeed(0.75);
                     //intake.setTransferspeed(0.5);
                     intake.setSpinner(-1);
                     follower.setMaxPower(1);
                     follower.followPath(intakeset1, false);
-                    turret.moveTurretToPosition(3500);
+
                     waitTimer2.reset();
                     setPathState(222);
                 }
                 break;
             case 222:
-                if (follower.getCurrentTValue()>=0.15) {
+                if (follower.getCurrentTValue()>=0.3) {
 
-                    follower.setMaxPower(.2);
+                    follower.setMaxPower(.3);
                     shooter.setshooter(shooterspeed);
 
                     waitTimer2.reset();
@@ -161,27 +128,16 @@ public class closeautored extends OpMode {
                 if (!follower.isBusy() && waitTimer2.seconds() >= 0.5) {
                     //follower.setMaxPower(.75);
 
-                    follower.setMaxPower(.8);
-                    follower.setHeadingPIDFCoefficients(new PIDFCoefficients(0.8, 0, 0.04, 0.005));
+                    follower.setMaxPower(1);
                     follower.followPath(scoreset1, false);
-                  //  shooter.setshooter(shooterspeed);
-                    waitTimer3.reset();
+                    follower.setHeadingPIDFCoefficients(new PIDFCoefficients(0.8, 0, 0.04, 0.005));
+                    //  shooter.setshooter(shooterspeed);
+                    waitTimer1.reset();
                     setPathState(21);
                 }
 
                 break;
-//            case 200: // First path to depo preload
-//                if (follower.getCurrentTValue()>=0.1 && waitTimer3.seconds() >= 0.1) {
-//                    //follower.setMaxPower(.75);
 //
-//                    //intake.setTransferspeed(0.5);
-//                    waitTimer1.reset();
-//                    setPathState(21);
-//                }
-//
-//                break;
-
-
             case 21: // First path to depo preload
                 if (!follower.isBusy() && waitTimer1.seconds() >= 0.5) {
                     //follower.setMaxPower(.75);
@@ -194,65 +150,17 @@ public class closeautored extends OpMode {
                 break;
 
             case 30:
-                if (!follower.isBusy() && waitTimer2.seconds() >= 5.1) {
+                if (!follower.isBusy() && waitTimer2.seconds() >= 5.5) {
                     shooter.setshooter(0);
-                    shooter.setKickerspeed(0.75);
                     //intake.setTransferspeed(0.5);
-                    intake.setSpinner(-1);
-                    follower.setMaxPower(1);
-                    follower.followPath(intakeset2, false);
-                    waitTimer2.reset();
-                    setPathState(31);
-                }
-                break;
-            case 31:
-                if (follower.getCurrentTValue()>=0.2) {
 
-                    follower.setMaxPower(.3);
-                    shooter.setshooter(shooterspeed);
-                    waitTimer2.reset();
-                    setPathState(32);
-                }
-
-                break;
-            case 32: // First path to depo preload
-                if (!follower.isBusy() && waitTimer2.seconds() >= 2) {
-                    //follower.setMaxPower(.75);
-
-                    follower.setMaxPower(1);
-                    follower.followPath(scoreset2, false);
-                    //shooter.setshooter(shooterspeed);
-                    waitTimer3.reset();
-                    setPathState(33);
-                }
-
-                break;
-
-//            case 333: // First path to depo preload
-//                if (follower.getCurrentTValue()>=0.1 && waitTimer3.seconds() >= 2) {
-//                    //follower.setMaxPower(.75);
-//                   // intake.setTransferspeed(0.5);
-//                   // shooter.setshooter(shooterspeed);
-//                    waitTimer1.reset();
-//                    setPathState(33);
-//                }
-//
-//                break;
-
-            case 33: // First path to depo preload
-                if (!follower.isBusy() && waitTimer1.seconds() >= 1) {
-                    //follower.setMaxPower(.75);
-                    intake.setTransferspeed(1);
-                    shooter.setKickerspeed(0);
-                    waitTimer2.reset();
+                    waitTimer1.reset();
                     setPathState(99);
                 }
-
                 break;
-
             case 99: // First path to depo preload
-                if (!follower.isBusy() && waitTimer2.seconds() >= 4.5) {
-                    follower.setMaxPower(.75);
+                if (!follower.isBusy() && waitTimer1.seconds() >= 1) {
+                    //follower.setMaxPower(.75);
                     follower.followPath(parkpath, false);
                     shooter.setshooter(0);
                     shooter.setKickerspeed(0.5);
@@ -286,6 +194,9 @@ public class closeautored extends OpMode {
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.addData("turretposticks:", turret.getturretposticks());
+        telemetry.addData("headingerror:", follower.getHeadingError());
+        telemetry.addData("heading:", follower.getHeading());
+
         telemetry.update();
     }
 
@@ -309,9 +220,9 @@ public class closeautored extends OpMode {
 
         turret.init(hardwareMap);
 
-        shooter.setPitchPosition(0.72);
+        shooter.setPitchPosition(0.83);
         turret.resetencoder();
-       // turret.turretautospin(1,250);
+        // turret.turretautospin(1,250);
     }
     public void setPathState(int state) {
         pathState = state;

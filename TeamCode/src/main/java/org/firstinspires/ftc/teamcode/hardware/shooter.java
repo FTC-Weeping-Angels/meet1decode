@@ -30,7 +30,7 @@ public class shooter {
     private ShooterState shooterState;
     // ---- Sensors ---- //
 
-    public shooter(HardwareMap hardwareMap) {
+    public void init(HardwareMap hardwareMap) {
 
         this.lrhino = hardwareMap.get(DcMotorEx.class, "lrhino");
         this.rrhino = hardwareMap.get(DcMotorEx.class, "rrhino");

@@ -44,6 +44,10 @@ public class cleantele extends LinearOpMode {
     private final double speed = 1.0;
     ElapsedTime transferTime2 = new ElapsedTime();
 
+    private final double farpos= 0.83;
+    private final double closepos = 0.68;
+    private final double sidepos = 0.63;
+
 
 
 
@@ -63,7 +67,7 @@ public class cleantele extends LinearOpMode {
 
 
         waitForStart();
-        shooter.setPitchPosition(0.6294);
+        shooter.setPitchPosition(0.58);
 
         while (opModeIsActive() && !isStopRequested()) {
 
@@ -91,10 +95,21 @@ public class cleantele extends LinearOpMode {
             } else if (currentGamepad1.left_trigger > 0.5 && previousGamepad1.left_trigger > 0.5) {  // Change to gamepad2 if that's what you need.
                 intake.setIntakeState(IntakeState.BACKSPIN);
                 intake.setTransferState(TransferState.REVERSE);
-            }  else {
+            }  else if(currentGamepad1.right_bumper ){
+                intake.setIntakeState(IntakeState.INTAKING);
+            } else if (currentGamepad1.square) {
+                shooter.setShooterState(ShooterState.BACKSPIN);
+                intake.setTransferState(TransferState.REVERSE);
+                //
+
+            } else{
                 intake.setIntakeState(IntakeState.STOP_SPINNER);
-                // intake.setTransferspeed(0.5);
+                intake.setTransferState(TransferState.TRANSFEROFF);
             }
+            if (currentGamepad1.squareWasReleased()) {
+                shooter.setShooterState(ShooterState.STOP_SHOOTER);
+            }
+
             if(intake.ballthreeinrobot()){
                 intake.led3ballsdetected();
             } else if(!intake.ballthreeinrobot()){
@@ -108,16 +123,10 @@ public class cleantele extends LinearOpMode {
             if (currentGamepad1.circle && !previousGamepad1.circle) {
                 shooter.setShooterState(ShooterState.FIREREDUCED);
             }
-            if (currentGamepad2.circle && !previousGamepad2.circle) {
-                shooter.setShooterState(ShooterState.FIREREDUCED);
-            }
 
-            if (currentGamepad1.square && !previousGamepad1.square) {
-                shooter.setShooterState(ShooterState.BACKSPIN);
-                intake.setTransferState(TransferState.REVERSE);
-                //
 
-            }
+
+
 
             if (currentGamepad1.cross && !previousGamepad1.cross) {  // Change to gamepad2 if that's what you need.
                 shooter.setShooterState(ShooterState.STOP_SHOOTER);
@@ -126,20 +135,28 @@ public class cleantele extends LinearOpMode {
             }
             if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) {  // Change to gamepad2 if that's what you need.
                 intake.setTransferState(TransferState.FIRE);
+               // intake.setIntakeState(IntakeState.INTAKING);
 
             } else if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {  // Change to gamepad2 if that's what you need.
                 intake.setTransferState(TransferState.REVERSE);
             } else if(currentGamepad1.leftBumperWasReleased() || currentGamepad1.rightBumperWasReleased()) {
                 intake.setTransferState(TransferState.TRANSFEROFF);
+                //intake.setIntakeState(IntakeState.STOP_SPINNER);
+
             }
 
            /// ???????
-            if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {  // Change to gamepad2 if that's what you need.
-               turret.setturretspeed(0.2);
+            if (currentGamepad2.right_bumper) {  // Change to gamepad2 if that's what you need.
+               turret.setturretspeed(0.4);
 
-            } else if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) {  // Change to gamepad2 if that's what you need.
+            } else if (currentGamepad2.left_bumper) {  // Change to gamepad2 if that's what you need.
+                turret.setturretspeed(0.6);
+            }  else if (currentGamepad2.right_trigger > 0.5 && previousGamepad2.right_trigger > 0.5) {  // Change to gamepad2 if that's what you need.
+                turret.setturretspeed(0.2);
+
+            } else if (currentGamepad2.left_trigger > 0.5 && previousGamepad2.left_trigger > 0.5) {  // Change to gamepad2 if that's what you need.
                 turret.setturretspeed(0.8);
-            } else if(currentGamepad2.leftBumperWasReleased() || currentGamepad2.rightBumperWasReleased()) {
+            } else {
                 turret.setturretspeed(0.5);
             }
 
@@ -153,15 +170,15 @@ public class cleantele extends LinearOpMode {
                 turret.setturretspeed(0.5);
             }
             ////?????
-            if (currentGamepad2.a && !previousGamepad2.a) {  // Change to gamepad2 if that's what you need.
-                moveTurretToPosition(3000);
-
-            }
-
-            if (currentGamepad2.y && !previousGamepad2.y) {  // Change to gamepad2 if that's what you need.
-                moveTurretToPosition(-2500);
-
-            }
+//            if (currentGamepad2.a && !previousGamepad2.a) {  // Change to gamepad2 if that's what you need.
+//                moveTurretToPosition(3000);
+//
+//            }
+//
+//            if (currentGamepad2.y && !previousGamepad2.y) {  // Change to gamepad2 if that's what you need.
+//                moveTurretToPosition(-2500);
+//
+//            }
 
             if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up) {  // Change to gamepad2 if that's what you need.
                 shooter.setPitchPosition(shooter.getPitchPosition()+0.05);
@@ -170,6 +187,27 @@ public class cleantele extends LinearOpMode {
                 shooter.setPitchPosition(shooter.getPitchPosition()-0.05);
             }
 
+
+
+            if (currentGamepad2.triangle && !previousGamepad2.triangle) {
+                shooter.setPitchPosition(closepos);
+            }
+
+            if (currentGamepad2.square && !previousGamepad2.square) {
+                shooter.setPitchPosition(sidepos);
+                //
+
+            }
+            if (currentGamepad2.circle && !previousGamepad2.circle) {
+                shooter.setPitchPosition(sidepos);
+                //
+
+            }
+            if (currentGamepad2.cross && !previousGamepad2.cross) {
+                shooter.setPitchPosition(farpos);
+                //
+
+            }
 //
 
             switch (intake.getIntakeState()) {
@@ -194,7 +232,7 @@ public class cleantele extends LinearOpMode {
                     break;
                 case INTAKING:
                     intake.setTransferspeed(1);
-                    shooter.setKickerspeed(0);
+                    shooter.setKickerspeed(0.63);
                     intake.setTransferState(TransferState.SCANNING);
                     break;
                 case SCANNING:
@@ -230,7 +268,7 @@ public class cleantele extends LinearOpMode {
                     shooter.setShooterState(ShooterState.IDLE);
                     break;
                 case FIREREDUCED:
-                    shooter.setshooter(0.8);
+                    shooter.setshooter(0.78);
                     shooter.setShooterState(ShooterState.IDLE);
                     break;
                 case FIREFAR:
@@ -327,15 +365,15 @@ public class cleantele extends LinearOpMode {
     private void initDrive () {
 //        this.controllers = new Controllers(this);
 
-//        this.intake = new intake();
-//        intake.init(hardwareMap);
+        this.intake = new intake();
+        intake.init(hardwareMap);
 
 
         this.drivetrain = new drive();
         drivetrain.init(hardwareMap);
 
-//        this.shooter = new shooter();
-//        shooter.init(hardwareMap);////
+        this.shooter = new shooter();
+        shooter.init(hardwareMap);////
 
         this.turret = new turret();
         turret.init(hardwareMap);

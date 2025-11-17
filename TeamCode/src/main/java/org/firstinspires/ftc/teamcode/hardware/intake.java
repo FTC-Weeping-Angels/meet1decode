@@ -75,7 +75,7 @@ public class intake {
     private IntakeState intakeState;
     private TransferState transferState;
 
-    public intake(HardwareMap hardwareMap) {
+    public void init(HardwareMap hardwareMap) {
 
 
         // this.wrist = hwMap.get(ServoImplEx.class, "intake_wrist");
@@ -94,7 +94,7 @@ public class intake {
 
         this.intakeState = IntakeState.IDLE;
         this.transferState = TransferState.IDLE;
-        //this.shooter = new shooter();
+        this.shooter = new shooter();
       //  shooter;
 
     }
@@ -252,9 +252,9 @@ return distanceMM;
     public double getSpinnerVoltage() {
         return spinner.getCurrent(CurrentUnit.AMPS);
     }
-//    public shooter getShooter () {
-//        return shooter;
-//    }
+    public shooter getShooter () {
+        return shooter;
+    }
 
     //    public Limelight getLimelight() {
 //        return limelight;

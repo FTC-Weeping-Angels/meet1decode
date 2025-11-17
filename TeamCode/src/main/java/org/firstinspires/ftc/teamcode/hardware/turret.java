@@ -93,7 +93,46 @@ public class turret {
         return turretencoder.getCurrentPosition();
     }
 
+    public void moveTurretToPosition(int targetTicks) {
 
+        double currentPosition;
+        double error;
+        double calculatedPower;
+        double servoCommand;
+
+        while ( Math.abs(targetTicks - getturretposticks()) > STOP_THRESHOLD) {
+
+            currentPosition = getturretposticks();
+
+            // 1. Calculate Error (in Ticks)
+            error = targetTicks - currentPosition;
+
+            // 2. Calculate Power (P Control)
+            calculatedPower = error * P_GAIN;
+
+            // 3. Limit and Clip Power
+            calculatedPower = Range.clip(calculatedPower, -MAX_POWER, MAX_POWER);
+
+            // 4. Convert Power (-1.0 to 1.0) to Servo Command (0.0 to 1.0)
+            servoCommand = 0.5 + (calculatedPower / 2.0);
+
+            // 5. Command the Servo
+            setturretspeed(servoCommand);
+
+            // --- Telemetry for Debugging ---
+//        telemetry.addData("Target", "%.1f°", targetAngleDegrees);
+//        telemetry.addData("Current", "%.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
+//        telemetry.addData("Error Ticks", (int) error);
+//        telemetry.addData("Power", String.format("%.3f", calculatedPower));
+//        telemetry.update();
+        }
+
+        // Stop the Servo
+        setturretspeed(0.5);
+//        telemetry.addData("Movement Complete", "Stopped at %.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
+//        telemetry.update();
+        //  return;
+    }
     public Servo getlturret() {
         return leftturret;
     }
@@ -106,81 +145,6 @@ public class turret {
         return data.toString();
     }
 
-//    public void moveTurretToPosition(int targetTicks) {
-//
-//        double currentPosition;
-//        double error;
-//        double calculatedPower;
-//        double servoCommand;
-
-//        while (opModeIsActive() && Math.abs(targetTicks - getturretposticks()) > STOP_THRESHOLD) {
-//
-//            currentPosition = getturretposticks();
-//
-//            // 1. Calculate Error (in Ticks)
-//            error = targetTicks - currentPosition;
-//
-//            // 2. Calculate Power (P Control)
-//            calculatedPower = error * P_GAIN;
-//
-//            // 3. Limit and Clip Power
-//            calculatedPower = Range.clip(calculatedPower, -MAX_POWER, MAX_POWER);
-//
-//            // 4. Convert Power (-1.0 to 1.0) to Servo Command (0.0 to 1.0)
-//            servoCommand = 0.5 + (calculatedPower / 2.0);
-//
-//            // 5. Command the Servo
-//            setturretspeed(servoCommand);
-//
-//            // --- Telemetry for Debugging ---
-////        telemetry.addData("Target", "%.1f°", targetAngleDegrees);
-////        telemetry.addData("Current", "%.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
-////        telemetry.addData("Error Ticks", (int) error);
-////        telemetry.addData("Power", String.format("%.3f", calculatedPower));
-////        telemetry.update();
-//        }
-//
-//        // Stop the Servo
-//        setturretspeed(0.5);
-////        telemetry.addData("Movement Complete", "Stopped at %.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
-////        telemetry.update();
-//        //  return;
-//    }
-
-//    public void moveTurretToPosition(int targetTicks) {
-//
-//        while (opModeIsActive() && Math.abs(targetTicks - turretEncoder.getCurrentPosition()) > stopThresholdTicks) {
-//
-//            int currentPosition = turretEncoder.getCurrentPosition();
-//
-//            // 1. Calculate Error (in Ticks)
-//            error = targetTicks - currentPosition;
-//
-//            // 2. Calculate Power (P Control)
-//            calculatedPower = error * P_GAIN;
-//
-//            // 3. Limit and Clip Power
-//            calculatedPower = Range.clip(calculatedPower, -MAX_POWER, MAX_POWER);
-//
-//            // 4. Convert Power (-1.0 to 1.0) to Servo Command (0.0 to 1.0)
-//            servoCommand = 0.5 + (calculatedPower / 2.0);
-//
-//            // 5. Command the Servo
-//            turretServo.setPosition(servoCommand);
-
-            // --- Telemetry for Debugging ---
-//        telemetry.addData("Target", "%.1f°", targetAngleDegrees);
-//        telemetry.addData("Current", "%.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
-//        telemetry.addData("Error Ticks", (int) error);
-//        telemetry.addData("Power", String.format("%.3f", calculatedPower));
-//        telemetry.update();
-      //  }
-
-        // Stop the Servo
-//        turretServo.setPosition(0.5);
-////        telemetry.addData("Movement Complete", "Stopped at %.1f°", turretEncoder.getCurrentPosition() / TICKS_PER_DEGREE);
-////        telemetry.update();
-//    }
 
 }
 

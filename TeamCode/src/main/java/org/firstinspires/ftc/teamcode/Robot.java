@@ -17,9 +17,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 
 public class Robot {
-    public final intake intake;
-    public final Limelight limelight;
-    public final shooter shooter;
+//    public final intake intake;
+//    public final Limelight limelight;
+//    public final shooter shooter;
   //  public final Transfer transfer;
     public final Follower follower;
     public final Alliance alliances;
@@ -33,9 +33,9 @@ public class Robot {
 
     public Robot(HardwareMap hardwareMap, Alliance alliances){
         this.alliances = alliances;
-        intake = new intake(hardwareMap);
-        shooter = new shooter(hardwareMap);
-        limelight = new Limelight(hardwareMap, alliances);
+//        intake = new intake(hardwareMap);
+//        shooter = new shooter(hardwareMap);
+       // limelight = new Limelight(hardwareMap, alliances);
        // transfer = new Transfer(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
 
